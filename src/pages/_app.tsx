@@ -7,7 +7,7 @@ import { Header } from "../components/Header";
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
-      <Header></Header>
+      <Header />
       <Component {...pageProps} />
     </>
   );
