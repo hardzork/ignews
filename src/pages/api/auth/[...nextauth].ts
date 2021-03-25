@@ -22,17 +22,15 @@ export default NextAuth({
       // console.log("user:", user);
       const { email } = user;
       try {
-        const userExist = await fauna.query(
-          q.Map(
-            Paginate(Match(Index("user_by_email"), email)),
-            Lambda("X", Get(Var("X")))
+        await fauna.query(
+          q.If(
+            q.Not(
+              q.Exists(q.Match(q.Index("user_by_email"), q.Casefold(email)))
+            ),
+            q.Create(q.Collection("users"), { data: { email } }),
+            q.Get(q.Match(q.Index("user_by_email"), q.Casefold(email)))
           )
         );
-        if (!userExist) {
-          await fauna.query(
-            q.Create(q.Collection("users"), { data: { email } })
-          );
-        }
         return true;
       } catch (error) {
         return false;
