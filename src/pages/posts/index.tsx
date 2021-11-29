@@ -5,6 +5,8 @@ import Prismic from "@prismicio/client";
 import { RichText } from "prismic-dom";
 import { getPrismicClient } from "../../services/prismic";
 import styles from "./styles.module.scss";
+import { getSession } from "next-auth/client";
+import { Session } from "next-auth";
 
 type Post = {
   slug: string;
@@ -14,9 +16,10 @@ type Post = {
 };
 interface PostsProps {
   posts: Post[];
+  activeSubscription: boolean;
 }
 
-export default function Posts({ posts }: PostsProps) {
+export default function Posts({ posts, activeSubscription }: PostsProps) {
   return (
     <>
       <Head>
@@ -24,15 +27,25 @@ export default function Posts({ posts }: PostsProps) {
       </Head>
       <main className={styles.container}>
         <div className={styles.posts}>
-          {posts.map((post) => (
-            <Link href={`/posts/${post.slug}`} key={post.slug}>
-              <a>
-                <time>{post.updatedAt}</time>
-                <strong>{post.title}</strong>
-                <p>{post.excerpt}</p>
-              </a>
-            </Link>
-          ))}
+          {posts.map((post) =>
+            activeSubscription ? (
+              <Link href={`/posts/${post.slug}`} key={post.slug}>
+                <a>
+                  <time>{post.updatedAt}</time>
+                  <strong>{post.title}</strong>
+                  <p>{post.excerpt}</p>
+                </a>
+              </Link>
+            ) : (
+              <Link href={`/posts/preview/${post.slug}`} key={post.slug}>
+                <a>
+                  <time>{post.updatedAt}</time>
+                  <strong>{post.title}</strong>
+                  <p>{post.excerpt}</p>
+                </a>
+              </Link>
+            )
+          )}
         </div>
       </main>
     </>
@@ -46,6 +59,8 @@ export const getStaticProps: GetStaticProps = async () => {
     { fetch: ["post.title", "post.content"], pageSize: 100 }
   );
   // console.log(JSON.stringify(response, null, 2));
+  const session = await getSession();
+  const activeSubscription = session?.activeSubscription;
 
   const posts = response.results.map((post) => {
     return {
@@ -64,5 +79,5 @@ export const getStaticProps: GetStaticProps = async () => {
       ),
     };
   });
-  return { props: { posts } };
+  return { props: { posts, activeSubscription } };
 };
