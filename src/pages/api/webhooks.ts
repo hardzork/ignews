@@ -53,11 +53,20 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         if (relevantEvents.has(type)) {
           switch (type) {
             case "customer.subscription.updated":
-            case "customer.subscription.deleted":
-              const subscription = event.data.object as Stripe.Subscription;
+              const subscriptionUpdated = event.data
+                .object as Stripe.Subscription;
               await saveSubscription(
-                subscription.id,
-                subscription.customer.toString(),
+                subscriptionUpdated.id,
+                subscriptionUpdated.customer.toString(),
+                false
+              );
+              break;
+            case "customer.subscription.deleted":
+              const subscriptionDeleted = event.data
+                .object as Stripe.Subscription;
+              await saveSubscription(
+                subscriptionDeleted.id,
+                subscriptionDeleted.customer.toString(),
                 false
               );
               break;
