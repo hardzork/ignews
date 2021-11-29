@@ -5,8 +5,9 @@ import Prismic from "@prismicio/client";
 import { RichText } from "prismic-dom";
 import { getPrismicClient } from "../../services/prismic";
 import styles from "./styles.module.scss";
-import { getSession } from "next-auth/client";
+import { getSession, useSession } from "next-auth/client";
 import { Session } from "next-auth";
+import { useEffect, useState } from "react";
 
 type Post = {
   slug: string;
@@ -16,10 +17,17 @@ type Post = {
 };
 interface PostsProps {
   posts: Post[];
-  activeSubscription: boolean;
 }
 
-export default function Posts({ posts, activeSubscription }: PostsProps) {
+export default function Posts({ posts }: PostsProps) {
+  const [session] = useSession();
+  const [activeSubscription, setActiveSubscription] = useState(false);
+  useEffect(() => {
+    // if (session?.activeSubscription) {
+    //   router.push(`/posts/${post.slug}`);
+    // }
+    setActiveSubscription(session?.activeSubscription);
+  }, [session]);
   return (
     <>
       <Head>
@@ -59,8 +67,8 @@ export const getStaticProps: GetStaticProps = async () => {
     { fetch: ["post.title", "post.content"], pageSize: 100 }
   );
   // console.log(JSON.stringify(response, null, 2));
-  const session = await getSession();
-  const activeSubscription = session?.activeSubscription;
+  // const session = await getSession();
+  // const activeSubscription = session?.activeSubscription;
 
   const posts = response.results.map((post) => {
     return {
@@ -79,5 +87,5 @@ export const getStaticProps: GetStaticProps = async () => {
       ),
     };
   });
-  return { props: { posts, activeSubscription } };
+  return { props: { posts } };
 };
