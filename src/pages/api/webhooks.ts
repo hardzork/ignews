@@ -3,6 +3,7 @@ import { Readable } from "stream";
 import Stripe from "stripe";
 import { stripe } from "../../services/stripe";
 import { saveSubscription } from "./_lib/manageSubscription";
+import Cors from "micro-cors";
 
 async function buffer(readable: Readable) {
   const chunks = [];
@@ -17,9 +18,13 @@ export const config = {
   },
 };
 
+const cors = Cors({
+  allowMethods: ["POST", "HEAD"],
+});
+
 const relevantEvents = new Set([
   "checkout.session.completed",
-  // "customer.subscription.created",
+  "customer.subscription.created",
   "customer.subscription.updated",
   "customer.subscription.deleted",
 ]);
@@ -31,7 +36,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const secret = req.headers["stripe-signature"];
 
     let event: Stripe.Event;
-    console.log(event);
 
     try {
       event = stripe.webhooks.constructEvent(
@@ -39,6 +43,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         secret,
         process.env.STRIPE_WEBHOOK_SECRET
       );
+      console.log("EVENTO:", event);
     } catch (error) {
       res.status(400).send(`Webhook error: ${error.message}`);
     }
@@ -47,7 +52,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (relevantEvents.has(type)) {
       try {
         switch (type) {
-          // case "customer.subscription.created":
+          case "customer.subscription.created":
           case "customer.subscription.updated":
           case "customer.subscription.deleted":
             const subscription = event.data.object as Stripe.Subscription;
