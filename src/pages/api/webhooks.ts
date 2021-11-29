@@ -48,9 +48,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(400).send(`Webhook error: ${error.message}`);
     }
 
-    const { type } = event;
-    if (relevantEvents.has(type)) {
-      try {
+    try {
+      const { type } = event;
+      if (relevantEvents.has(type)) {
         switch (type) {
           case "customer.subscription.created":
           case "customer.subscription.updated":
@@ -74,9 +74,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           default:
             throw new Error("Unhandled event");
         }
-      } catch (error) {
-        return res.json({ error: "Webhook handler failed" });
       }
+    } catch (err) {
+      return res.json({ error: `Webhook handler failed: ${err.message}` });
     }
 
     res.json({ received: true });
