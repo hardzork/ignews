@@ -28,7 +28,7 @@ export default function Home({ product }: HomeProps) {
             the <span>React</span> world
           </h1>
           <p>
-            Get access to all publications
+            Get access to all publications now
             <br />
             <span>for {product.amount} month</span>
           </p>
