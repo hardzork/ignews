@@ -26,6 +26,7 @@ export default function Posts({ posts }: PostsProps) {
     // if (session?.activeSubscription) {
     //   router.push(`/posts/${post.slug}`);
     // }
+    console.log(session?.activeSubscription);
     setActiveSubscription(session?.activeSubscription);
   }, [session]);
   return (

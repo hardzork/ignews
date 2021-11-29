@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import Providers from "next-auth/providers";
-import { Get, Index, Lambda, Match, Paginate, query as q, Var } from "faunadb";
+import { query as q } from "faunadb";
 
 import { fauna } from "../../../services/fauna";
 
