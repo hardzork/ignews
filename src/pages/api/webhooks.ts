@@ -43,7 +43,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         secret,
         process.env.STRIPE_WEBHOOK_SECRET
       );
-      console.log("EVENTO:", event);
     } catch (error) {
       res.status(400).send(`Webhook error: ${error.message}`);
     }
@@ -53,10 +52,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const { type } = event;
         if (relevantEvents.has(type)) {
           switch (type) {
-            case "customer.subscription.created":
+            // case "customer.subscription.created":
             case "customer.subscription.updated":
             case "customer.subscription.deleted":
               const subscription = event.data.object as Stripe.Subscription;
+              console.log("chegou no 1");
               await saveSubscription(
                 subscription.id,
                 subscription.customer.toString(),
@@ -66,6 +66,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             case "checkout.session.completed":
               const checkoutSession = event.data
                 .object as Stripe.Checkout.Session;
+              console.log("chegou no 2");
               await saveSubscription(
                 checkoutSession.subscription.toString(),
                 checkoutSession.customer.toString(),
@@ -83,7 +84,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     res.json({ received: true });
   } else {
-    // res.setHeader("Allow", "POST");
+    res.setHeader("Allow", "POST");
     res.status(405).end("Method not allowed");
   }
 };
